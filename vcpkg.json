@@ -1,0 +1,8 @@
+{
+  "name": "seat-reservation-system",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "crow",
+    "libpqxx"
+  ]
+}
