@@ -3,23 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservation System</title>
+    <title>Event Reservation System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
-            margin: 0;
             background-color: #f4f4f9;
+            margin-top: 50px;
         }
-        h1 {
-            color: #333;
+
+        /* The grid holding all the seats */
+        .seat-container {
+            display: grid;
+            grid-template-columns: repeat(6, 40px); /* 6 columns */
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Basic styling for an available seat */
+        .seat {
+            width: 40px;
+            height: 40px;
+            background-color: #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        /* Hover effect for available seats */
+        .seat:not(.occupied):hover {
+            background-color: #a6a6a6;
+        }
+
+        /* Selected seat styling */
+        .seat.selected {
+            background-color: #6c5ce7; /* A nice purple */
+        }
+
+        /* Occupied seat styling */
+        .seat.occupied {
+            background-color: #444;
+            cursor: not-allowed;
+        }
+
+        /* Legend underneath the seats */
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .legend div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #00997a;
         }
     </style>
 </head>
 <body>
-    <h1>(Here will be our reservation system)</h1>
+
+    <h1>Select Your Seats</h1>
+
+    <div class="legend">
+        <div><div class="legend-box" style="background-color: #ccc;"></div> Available</div>
+        <div><div class="legend-box" style="background-color: #6c5ce7;"></div> Selected</div>
+        <div><div class="legend-box" style="background-color: #444;"></div> Occupied</div>
+    </div>
+
+    <div id="seat-container" class="seat-container"></div>
+
+    <p id="status">You have selected 0 seat(s).</p>
+    <button id="reserve-btn">Confirm Reservation</button>
+
+    <script src="src/reservationpage.js"></script>
 </body>
 </html>
