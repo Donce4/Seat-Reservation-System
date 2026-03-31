@@ -1,3 +1,9 @@
 # Seat-Reservation-System
 
-A "Hello World" C++ backend using Crow and PostgreSQL.
+C++ backend using Crow and PostgreSQL.
+
+Link for the initial version of the frontend
+https://donce4.github.io/Seat-Reservation-System/
+
+
+
