@@ -28,10 +28,10 @@ export function SeatReservation() {
       <EventHeader />
       
       <main className="flex-1 p-4 md:p-6 bg-background">
-        <div className="max-w-7xl mx-auto h-full">
-          <div className="grid lg:grid-cols-[1fr_350px] gap-6 h-full">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-[1fr_350px] gap-6 items-start">
             {/* Main content - Arena or Sector view */}
-            <div className="min-h-[400px] lg:min-h-[500px] flex flex-col">
+            <div>
               {selectedSector ? <SectorView /> : <ArenaMap />}
             </div>
 

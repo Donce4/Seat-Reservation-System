@@ -65,14 +65,14 @@ function Legend() {
 export function ArenaMap() {
   const { sectors } = useSeating();
   return (
-    <div className="relative w-full h-full bg-card rounded-2xl border-2 border-border p-4 flex flex-col">
+    <div className="relative w-full bg-card rounded-2xl border-2 border-border p-4">
       <Legend />
       
-      {/* Arena oval container — aspect ratio keeps it wide like a real basketball arena */}
-      <div className="relative flex-1 flex items-center justify-center pt-14 min-h-0">
+      {/* Spacer for legend */}
+      <div className="pt-14">
         <div
           className="relative w-full border-[3px] border-foreground rounded-[50%] bg-white/80 overflow-hidden"
-          style={{ aspectRatio: '2 / 1', maxHeight: '100%', maxWidth: '100%' }}
+          style={{ aspectRatio: '2 / 1' }}
         >
           {/* Court in center */}
           <div 
