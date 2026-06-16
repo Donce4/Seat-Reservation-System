@@ -20,12 +20,13 @@ function SectorBlock({ sector }: { sector: Sector }) {
         <TooltipTrigger asChild>
           <button
             onClick={() => setSelectedSector(sector)}
-            className={`absolute ${getColor()} border border-border/50 rounded text-xs font-bold text-foreground flex items-center justify-center transition-all hover:scale-105 hover:z-10 cursor-pointer`}
+            className={`absolute ${getColor()} border border-border/50 rounded font-bold text-foreground flex items-center justify-center transition-all hover:scale-105 hover:z-10 cursor-pointer overflow-hidden leading-none`}
             style={{
               left: `${sector.position.x}%`,
               top: `${sector.position.y}%`,
               width: `${sector.position.width}%`,
               height: `${sector.position.height}%`,
+              fontSize: 'clamp(6px, 0.9vw, 11px)',
             }}
             aria-label={`Sektorius ${sector.name}, ${sector.availableSeats} laisvų vietų, €${sector.price}`}
           >
