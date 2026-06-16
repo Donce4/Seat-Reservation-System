@@ -4,6 +4,7 @@ import { supabase } from './supabase';
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { Sector, Seat, CartItem, BestSeatCriteria } from './types';
 import { createInitialSectors } from './seat-data';
+import { useWasmRecommender, recommendSeatsJS } from './use-wasm-recommender';
 
 interface SeatingState {
   sectors: Sector[];
@@ -29,6 +30,8 @@ interface SeatingContextType extends SeatingState {
 const SeatingContext = createContext<SeatingContextType | null>(null);
 
 export function SeatingProvider({ children }: { children: React.ReactNode }) {
+  const { findBestSeats, isReady } = useWasmRecommender();
+
   const [state, setState] = useState<SeatingState>({
     sectors: [],
     selectedSeats: [],
@@ -292,63 +295,44 @@ export function SeatingProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  /**
-   * WEBASSEMBLY INTEGRATION - Best Seat Suggestion
-   * 
-   * This is a placeholder function for the "Best Seat Suggestion" feature.
-   * The actual algorithm will be implemented in C++ and compiled to WebAssembly.
-   * 
-   * For now, this function selects a random available seat to demonstrate
-   * the state change.
-   * 
-   * @param criteria - The search criteria: 'centered' | 'group' | 'value'
-   * @param groupSize - Number of seats needed (for 'group' criteria)
-   */
   const handleFindBestSeats = useCallback(async (criteria: BestSeatCriteria, groupSize: number = 1) => {
     setState(prev => ({ ...prev, isLoading: true }));
 
-    // Simulate WebAssembly processing time
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Give the WASM module a tick to finish loading if it just became ready
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     setState(prev => {
-      // Get all available seats
-      const availableSeats: { seat: Seat; sectorName: string }[] = [];
-      prev.sectors.forEach(sector => {
-        sector.seats.forEach(seat => {
-          if (seat.status === 'available') {
-            availableSeats.push({ seat, sectorName: sector.name });
-          }
-        });
-      });
+      let recommendedIds: string[];
 
-      if (availableSeats.length === 0) {
+      if (isReady()) {
+        recommendedIds = findBestSeats(prev.sectors, criteria, groupSize);
+      } else {
+        // Fallback: pure-JS mirror of the same strategies while WASM loads
+        console.warn('[WASM] Module not ready, using JS fallback');
+        recommendedIds = recommendSeatsJS(prev.sectors, criteria, groupSize);
+      }
+
+      if (recommendedIds.length === 0) {
         return { ...prev, isLoading: false };
       }
 
-      // TODO: Replace with actual WebAssembly call
-      // const wasmResult = await wasmModule.findBestSeats(criteria, groupSize, seatsData);
-      
-      // For now, select random available seat(s) as placeholder
-      const seatsToSelect = Math.min(groupSize, availableSeats.length);
-      const shuffled = [...availableSeats].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, seatsToSelect);
+      const selectedIds = new Set(recommendedIds);
 
-      // Update sectors with selected seats
-      const selectedIds = new Set(selected.map(s => s.seat.id));
       const updatedSectors = prev.sectors.map(sector => ({
         ...sector,
         seats: sector.seats.map(s =>
           selectedIds.has(s.id) ? { ...s, status: 'selected' as const } : s
         ),
+        availableSeats: sector.seats.filter(s =>
+          s.status === 'available' && !selectedIds.has(s.id)
+        ).length,
       }));
 
-      const newSelectedSeats = selected.map(s => ({
-        seat: { ...s.seat, status: 'selected' as const },
-        sectorName: s.sectorName,
-      }));
-
-      console.log(`[v0] handleFindBestSeats: Found ${seatsToSelect} seat(s) using criteria: ${criteria}`);
-      console.log('[v0] Ready for WebAssembly integration');
+      const newSelectedSeats = prev.sectors.flatMap(sector =>
+        sector.seats
+          .filter(s => selectedIds.has(s.id))
+          .map(s => ({ seat: { ...s, status: 'selected' as const }, sectorName: sector.name }))
+      );
 
       return {
         ...prev,
@@ -357,7 +341,7 @@ export function SeatingProvider({ children }: { children: React.ReactNode }) {
         isLoading: false,
       };
     });
-  }, []);
+  }, [findBestSeats, isReady]);
 
   const getTotalPrice = useCallback(() => {
     return state.selectedSeats.reduce((total, item) => total + item.seat.price, 0);
